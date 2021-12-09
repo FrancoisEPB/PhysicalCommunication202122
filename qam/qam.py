@@ -1,4 +1,6 @@
 import socket, pickle
+import time
+
 
 HOST = '127.0.0.1'
 PORT = 2000
@@ -111,6 +113,3 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 		s.sendall(b'-1-3i')
 		s.sendall(b'1-3i')
 		s.sendall(b'1+3i')
-	data = s.recv(1024)
-
-print('Received', repr(data))
