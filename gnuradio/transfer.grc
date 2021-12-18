@@ -48,13 +48,16 @@ blocks:
   id: variable_constellation_rect
   parameters:
     comment: ''
-    const_points: '[0.707+0.707j, -0.707+0.707j, -0.707-0.707j, 0.707-0.707j]'
-    imag_sect: '2'
-    precision: '8'
-    real_sect: '2'
-    rot_sym: '4'
+    const_points: '[-0.707-0.707j, -0.3535-0.707j, 0.707-0.707j, 0.3535-0.707j, -0.707-0.3535j,
+      -0.3535-0.3535j, 0.707-0.3535j, 0.3535-0.3535j, -0.707+0.707j, -0.3535+0.707j,
+      0.707+0.707j, 0.3535+0.707j, -0.707+0.3535j, -0.3535+0.3535j, 0.707+0.3535j,
+      0.3535+0.3535j]'
+    imag_sect: '4'
+    precision: '4'
+    real_sect: '4'
+    rot_sym: '16'
     soft_dec_lut: None
-    sym_map: '[0, 1, 2, 3]'
+    sym_map: '[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]'
     w_imag_sect: '1'
     w_real_sect: '1'
   states:
@@ -105,7 +108,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [144, 352.0]
+    coordinate: [120, 384.0]
     rotation: 0
     state: true
 - name: blocks_throttle_0
@@ -124,9 +127,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [696, 468.0]
+    coordinate: [688, 516.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: digital_constellation_modulator_0
   id: digital_constellation_modulator
   parameters:
@@ -146,9 +149,53 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [360, 352.0]
+    coordinate: [400, 496.0]
     rotation: 0
-    state: true
+    state: enabled
+- name: epy_block_0
+  id: epy_block
+  parameters:
+    _source_code: "\"\"\"\nEmbedded Python Blocks:\n\nEach time this file is saved,\
+      \ GRC will instantiate the first class it finds\nto get ports and parameters\
+      \ of your block. The arguments to __init__  will\nbe the parameters. All of\
+      \ them are required to have default values!\n\"\"\"\n\nimport numpy as np\n\
+      from gnuradio import gr\n\n\nclass qam16Block(gr.sync_block):\n    def __init__(self):\n\
+      \        gr.sync_block.__init__(\n            self,\n            name='qam16',\n\
+      \            in_sig=[np.uint32],\n            out_sig=[np.complex64]\n     \
+      \   )\n\n    def work(self, input_items, output_items):\n        mijnString\
+      \ = str(input_items[0])\n        bits = \"11100101110010\" + ''.join(format(ord(x),\
+      \ '08b') for x in mijnString) + \"00\"\n\n        min = 0.3535\n        max\
+      \ = 0.707\n\n        t = []\n        for i in range(0, len(bits), 4):\n    \
+      \        convert = dict({\n                '0000': (-max, -max),\n         \
+      \       '0001': (-min, -max),\n                '0010': (max, -max),\n      \
+      \          '0011': (min, -max),\n                '0100': (-max, -min),\n   \
+      \             '0101': (-min, -min),\n                '0110': (max, -min),\n\
+      \                '0111': (min, -min),\n                '1000': (-max, max),\n\
+      \                '1001': (-min, max),\n                '1010': (max, max),\n\
+      \                '1011': (min, max),\n                '1100': (-max, min),\n\
+      \                '1101': (-min, min),\n                '1110': (max, min),\n\
+      \                '1111': (min, min),\n            })\n            i, q = convert[bits[i:i+4]]\n\
+      \            t.append(complex(q,i))\n\n        # output_items[0][0] = complex(q,i)\n\
+      \        #print(len(input_items[0]), len(output_items[0]), len(t))\n       \
+      \ output_items[0][0:len(t)] = t\n\n        return len(output_items[0])\n\n \
+      \       #[0.707+0.707j,  0.3535+0.707j, 0.3535+0.3535j, 0.707+0.3535j, -0.3535+0.707j,\
+      \ -0.707+0.707j, -0.707+0.3535j, -0.3535+0.3535j, -0.3535-0.3535j, -0.707-0.3535j,\
+      \ -0.707-0.707j, -0.3535-0.707j, 0.707-0.3535j, 0.3535-0.3535j, 0.3535-0.707j,\
+      \ 0.707-0.707j]"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    _io_cache: ('qam16', 'qam16Block', [], [('0', 'int', 1)], [('0', 'complex', 1)],
+      '', [])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [440, 320.0]
+    rotation: 0
+    state: disabled
 - name: qtgui_const_sink_x_0
   id: qtgui_const_sink_x
   parameters:
@@ -202,7 +249,7 @@ blocks:
     marker9: '0'
     name: '""'
     nconnections: '1'
-    size: '1024'
+    size: '10000'
     style1: '0'
     style10: '0'
     style2: '0'
@@ -230,17 +277,40 @@ blocks:
     width7: '1'
     width8: '1'
     width9: '1'
-    xmax: '2'
-    xmin: '-2'
-    ymax: '2'
-    ymin: '-2'
+    xmax: '0.707'
+    xmin: '-0.707'
+    ymax: '0.707'
+    ymin: '-0.707'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [920, 460.0]
+    coordinate: [984, 508.0]
     rotation: 0
-    state: true
+    state: enabled
+- name: root_raised_cosine_filter_0
+  id: root_raised_cosine_filter
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha: '0.35'
+    comment: ''
+    decim: '1'
+    gain: '1'
+    interp: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ntaps: '11'
+    samp_rate: samp_rate
+    sym_rate: '1.0'
+    type: fir_filter_ccf
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [688, 144.0]
+    rotation: 0
+    state: disabled
 - name: uhd_usrp_sink_0
   id: uhd_usrp_sink
   parameters:
@@ -515,15 +585,20 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [688, 272.0]
+    coordinate: [1288, 136.0]
     rotation: 0
-    state: true
+    state: enabled
 
 connections:
 - [analog_random_source_x_0, '0', digital_constellation_modulator_0, '0']
+- [analog_random_source_x_0, '0', epy_block_0, '0']
 - [blocks_throttle_0, '0', qtgui_const_sink_x_0, '0']
 - [digital_constellation_modulator_0, '0', blocks_throttle_0, '0']
 - [digital_constellation_modulator_0, '0', uhd_usrp_sink_0, '0']
+- [epy_block_0, '0', blocks_throttle_0, '0']
+- [epy_block_0, '0', root_raised_cosine_filter_0, '0']
+- [epy_block_0, '0', uhd_usrp_sink_0, '0']
+- [root_raised_cosine_filter_0, '0', uhd_usrp_sink_0, '0']
 
 metadata:
   file_format: 1
